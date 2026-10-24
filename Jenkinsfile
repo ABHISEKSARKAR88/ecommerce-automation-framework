@@ -6,20 +6,20 @@ pipeline {
         CI = 'true'
     }
 
-    stage('Diagnose Environment') {
-    steps {
-        sh '''
-            echo "PATH=$PATH"
-            echo "HOME=$HOME"
-            command -v node || true
-            command -v npm || true
-            /usr/local/bin/node --version
-            /usr/local/bin/npm --version
-        '''
-    }
-}
-
     stages {
+        stage('Diagnose Environment') {
+            steps {
+                sh '''
+                    echo "PATH=$PATH"
+                    echo "HOME=$HOME"
+                    command -v node || true
+                    command -v npm || true
+                    /usr/local/bin/node --version
+                    /usr/local/bin/npm --version
+                '''
+            }
+        }
+
         stage('Install Dependencies') {
             steps {
                 sh 'npm ci'
@@ -33,7 +33,6 @@ pipeline {
             }
         }
     }
-
 
     post {
         always {
@@ -51,5 +50,4 @@ pipeline {
             )
         }
     }
-
 }
