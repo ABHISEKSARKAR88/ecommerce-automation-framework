@@ -3,8 +3,9 @@ pipeline {
     agent any
 
     environment {
-        CI = 'true'
-    }
+    CI = 'true'
+    PATH = "/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+}
 
     stages {
         stage('Diagnose Environment') {
