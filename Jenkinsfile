@@ -8,6 +8,7 @@ pipeline {
     }
 
     stages {
+
         stage('Install Dependencies') {
             steps {
                 sh 'npm ci'
@@ -45,6 +46,15 @@ pipeline {
                 artifacts: 'playwright-report/**, test-results/**',
                 allowEmptyArchive: true
             )
+
+            publishHTML(target: [
+            reportDir: 'playwright-report',
+            reportFiles: 'index.html',
+            reportName: 'Playwright HTML Report',
+            keepAll: true,
+            alwaysLinkToLastBuild: true,
+            allowMissing: false
+        ])
         }
     }
 }
