@@ -20,6 +20,15 @@ pipeline {
                 sh 'npm run test:smoke'
             }
         }
+
+        stage('Run Regression Tests') {
+            when {
+                branch 'main'
+            }
+            steps {
+                sh 'npm run test:regression'
+            }
+        }
     }
 
     post {
