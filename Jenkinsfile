@@ -4,13 +4,14 @@ pipeline {
 
     environment {
         CI = 'true'
+        PATH = "/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin"
     }
 
     stages {
         stage('Install Dependencies') {
             steps {
                 sh 'npm ci'
-                sh 'npx playwright install --with-deps chromium'
+                sh 'npx playwright install chromium'
             }
         }
 
@@ -20,7 +21,6 @@ pipeline {
             }
         }
     }
-
 
     post {
         always {
@@ -38,5 +38,4 @@ pipeline {
             )
         }
     }
-
 }
