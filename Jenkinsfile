@@ -3,9 +3,9 @@ pipeline {
     agent any
 
     environment {
-    CI = 'true'
-    PATH = "/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin"
-}
+        CI = 'true'
+        PATH = "/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+    }
 
     stages {
 
@@ -19,6 +19,15 @@ pipeline {
         stage('Run Smoke Tests') {
             steps {
                 sh 'npm run test:smoke'
+            }
+        }
+
+        stage('Run Regression Tests') {
+            when {
+                branch 'main'
+            }
+            steps {
+                sh 'npm run test:regression'
             }
         }
     }
