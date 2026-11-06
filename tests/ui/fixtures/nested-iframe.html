@@ -1,0 +1,43 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Nested Iframe Test</title>
+</head>
+<body>
+  <h1>Main Page</h1>
+
+  <iframe
+    id="parent-frame"
+    srcdoc="
+      <html>
+        <body>
+          <h2>Parent Iframe</h2>
+
+          <iframe
+            id='child-frame'
+            srcdoc=&quot;
+              &lt;html&gt;
+              &lt;body&gt;
+                &lt;h3&gt;Child Iframe&lt;/h3&gt;
+                &lt;label for='email'&gt;Email&lt;/label&gt;
+                &lt;input id='email' type='email' /&gt;
+                &lt;button id='submit'&gt;Submit&lt;/button&gt;
+                &lt;p id='result'&gt;&lt;/p&gt;
+
+                &lt;script&gt;
+                  document.getElementById('submit').addEventListener('click', function () {
+                    document.getElementById('result').textContent = 'Form submitted successfully';
+                  });
+                &lt;/script&gt;
+              &lt;/body&gt;
+              &lt;/html&gt;
+            &quot;>
+          </iframe>
+
+        </body>
+      </html>
+    ">
+  </iframe>
+</body>
+</html>

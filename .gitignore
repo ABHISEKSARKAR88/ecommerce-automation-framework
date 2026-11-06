@@ -6,11 +6,17 @@ node_modules/
 .env
 .env.*
 !.env.example
+playwright/.auth/
 
 # Playwright reports and test artifacts
 playwright-report/
 test-results/
 blob-report/
+
+# Sharding and merged reports
+shard-reports/
+merged-blob-reports/
+blob-reports/
 
 # Logs
 *.log
@@ -21,3 +27,6 @@ npm-debug.log*
 
 # IDE
 .idea/
+
+# Generated JUnit reports
+*-junit.xml
