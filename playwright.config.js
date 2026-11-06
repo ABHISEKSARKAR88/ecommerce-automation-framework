@@ -14,10 +14,14 @@ module.exports = defineConfig({
   workers: process.env.CI ? 2 : undefined,
 
   reporter: [
-    ['list'],
-    ['html', { outputFolder: 'playwright-report', open: 'never' }],
-    ['junit', { outputFile: 'test-results/junit.xml' }],
-  ],
+  ['list'],
+  ['html', { open: 'never' }],
+  ['junit', {
+    outputFile: process.env.PLAYWRIGHT_JUNIT_OUTPUT_NAME
+      ? `test-results/${process.env.PLAYWRIGHT_JUNIT_OUTPUT_NAME}`
+      : 'test-results/results.xml',
+  }],
+],
 
   use: {
     baseURL: 'https://www.saucedemo.com',
@@ -26,11 +30,49 @@ module.exports = defineConfig({
   },
 
   projects: [
-    {
-      name: 'chromium',
-      use: {
-        browserName: 'chromium',
-      },
+  {
+    name: 'setup',
+    testMatch: '**/auth.setup.js',
+  },
+
+  {
+    name: 'chromium',
+    use: {
+      browserName: 'chromium',
     },
+    dependencies: ['setup'],
+    testIgnore: [
+    '**/auth.setup.js',
+    '**/flaky-demo.spec.js',
   ],
+  },
+
+  {
+    name: 'firefox',
+    use: {
+      browserName: 'firefox',
+    },
+    dependencies: ['setup'],
+    testIgnore: [
+    '**/auth.setup.js',
+    '**/flaky-demo.spec.js',
+  ],
+  },
+
+  {
+  name: 'webkit',
+  use: {
+    browserName: 'webkit',
+    viewport: {
+      width: 1440,
+      height: 900,
+    },
+  },
+  dependencies: ['setup'],
+  testIgnore: [
+    '**/auth.setup.js',
+    '**/flaky-demo.spec.js',
+  ],
+},
+],
 });

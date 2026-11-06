@@ -1,0 +1,30 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>JavaScript Dialog Test</title>
+</head>
+<body>
+  <h1>Dialog Test</h1>
+
+  <button onclick="alert('This is an alert')">
+    Show Alert
+  </button>
+
+  <button onclick="
+    const result = confirm('Do you want to continue?');
+    document.getElementById('result').textContent = result;
+  ">
+    Show Confirm
+  </button>
+
+  <button onclick="
+    const name = prompt('Enter your name:');
+    document.getElementById('result').textContent = name;
+  ">
+    Show Prompt
+  </button>
+
+  <p id="result"></p>
+</body>
+</html>

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>File Upload Test</title>
+</head>
+<body>
+  <h1>Document Upload</h1>
+
+  <input type="file" id="document" multiple>
+
+  <p id="file-name"></p>
+
+  <script>
+    document.getElementById('document').addEventListener('change', event => {
+  const names = Array.from(event.target.files)
+    .map(file => file.name);
+
+  document.getElementById('file-name').textContent = names.join(', ');
+});
+  </script>
+</body>
+</html>
+
+<button id="download-report">Download Report</button>
+
+<script>
+  document.getElementById('download-report').addEventListener('click', () => {
+    const content = 'Trade ID,Status\nTRD001,Executed\nTRD002,Pending';
+
+    const blob = new Blob([content], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'trade-report.csv';
+    link.click();
+
+    URL.revokeObjectURL(url);
+  });
+</script>

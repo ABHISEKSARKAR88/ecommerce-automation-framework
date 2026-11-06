@@ -1,0 +1,34 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Iframe Test</title>
+</head>
+<body>
+  <h1>Main Page</h1>
+
+  <iframe
+    id="payment-frame"
+    srcdoc="
+      <html>
+        <body>
+          <h2>Payment Form</h2>
+
+          <label for='card'>Card Number</label>
+          <input id='card' type='text' />
+
+          <button id='pay'>Pay Now</button>
+
+          <p id='result'></p>
+
+          <script>
+            document.getElementById('pay').addEventListener('click', function () {
+              document.getElementById('result').textContent = 'Payment submitted successfully';
+            });
+          </script>
+        </body>
+      </html>
+    ">
+  </iframe>
+</body>
+</html>

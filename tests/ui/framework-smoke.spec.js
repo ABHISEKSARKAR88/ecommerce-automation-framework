@@ -1,6 +1,6 @@
 const {test , expect} = require('@playwright/test');
 
-test('framework smoke test, SauceDemo is accessible', async ({ page }) => {
+test('framework smoke test, SauceDemo is accessible @smoke', async ({ page }) => {
 
     await page.goto('/');
     await expect(page).toHaveTitle(/Swag Labs/);
