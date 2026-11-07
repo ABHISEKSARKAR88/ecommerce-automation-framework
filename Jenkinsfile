@@ -24,6 +24,8 @@ pipeline {
 
                     rm -f shard-1-junit.xml
                     rm -f shard-2-junit.xml
+                    rm -f api-smoke-junit.xml
+                    rm -f api-regression-junit.xml
                 '''
             }
         }
@@ -148,6 +150,56 @@ pipeline {
                             '''
                         }
                     }
+                }
+            }
+        }
+
+        stage('API Smoke Tests') {
+            when {
+                not {
+                    branch 'main'
+                }
+            }
+
+            steps {
+                catchError(
+                    buildResult: 'FAILURE',
+                    stageResult: 'FAILURE'
+                ) {
+                    sh '''
+                        PLAYWRIGHT_BLOB_OUTPUT_DIR=blob-reports/api-smoke \
+                        PLAYWRIGHT_JUNIT_OUTPUT_NAME=api-smoke-junit.xml \
+                        npx playwright test \
+                            --project=api \
+                            --grep "@smoke" \
+                            --workers=2 \
+                            --output=test-results/api-smoke \
+                            --reporter=blob,junit
+                    '''
+                }
+            }
+        }
+
+        stage('API Regression Tests') {
+            when {
+                branch 'main'
+            }
+
+            steps {
+                catchError(
+                    buildResult: 'FAILURE',
+                    stageResult: 'FAILURE'
+                ) {
+                    sh '''
+                        PLAYWRIGHT_BLOB_OUTPUT_DIR=blob-reports/api-regression \
+                        PLAYWRIGHT_JUNIT_OUTPUT_NAME=api-regression-junit.xml \
+                        npx playwright test \
+                            --project=api \
+                            --grep "@regression" \
+                            --workers=2 \
+                            --output=test-results/api-regression \
+                            --reporter=blob,junit
+                    '''
                 }
             }
         }

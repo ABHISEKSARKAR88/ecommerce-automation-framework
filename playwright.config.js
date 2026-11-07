@@ -29,7 +29,8 @@ module.exports = defineConfig({
     screenshot: 'only-on-failure',
   },
 
-  projects: [
+
+projects: [
   {
     name: 'setup',
     testMatch: '**/auth.setup.js',
@@ -42,9 +43,10 @@ module.exports = defineConfig({
     },
     dependencies: ['setup'],
     testIgnore: [
-    '**/auth.setup.js',
-    '**/flaky-demo.spec.js',
-  ],
+      '**/auth.setup.js',
+      '**/api/**',
+      '**/flaky-demo.spec.js',
+    ],
   },
 
   {
@@ -54,25 +56,36 @@ module.exports = defineConfig({
     },
     dependencies: ['setup'],
     testIgnore: [
-    '**/auth.setup.js',
-    '**/flaky-demo.spec.js',
-  ],
+      '**/auth.setup.js',
+      '**/api/**',
+      '**/flaky-demo.spec.js',
+    ],
   },
 
   {
-  name: 'webkit',
-  use: {
-    browserName: 'webkit',
-    viewport: {
-      width: 1440,
-      height: 900,
+    name: 'webkit',
+    use: {
+      browserName: 'webkit',
+      viewport: {
+        width: 1440,
+        height: 900,
+      },
+    },
+    dependencies: ['setup'],
+    testIgnore: [
+      '**/auth.setup.js',
+      '**/api/**',
+      '**/flaky-demo.spec.js',
+    ],
+  },
+
+  {
+    name: 'api',
+    testMatch: '**/*.api.spec.js',
+    use: {
+      baseURL: 'https://dummyjson.com',
     },
   },
-  dependencies: ['setup'],
-  testIgnore: [
-    '**/auth.setup.js',
-    '**/flaky-demo.spec.js',
-  ],
-},
 ],
+
 });
