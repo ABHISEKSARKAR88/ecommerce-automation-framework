@@ -60,9 +60,7 @@ pipeline {
             }
         }
 
-        // ----------------------------------------
         // UI SMOKE TESTS - NON MAIN BRANCHES
-        // ----------------------------------------
 
         stage('Smoke Tests') {
             when {
@@ -119,9 +117,7 @@ pipeline {
             }
         }
 
-        // ----------------------------------------
         // UI REGRESSION TESTS - MAIN
-        // ----------------------------------------
 
         stage('Regression Tests') {
             when {
@@ -176,9 +172,7 @@ pipeline {
             }
         }
 
-        // ----------------------------------------
         // API SMOKE TESTS - NON MAIN BRANCHES
-        // ----------------------------------------
 
         stage('API Smoke Tests') {
             when {
@@ -206,9 +200,7 @@ pipeline {
             }
         }
 
-        // ----------------------------------------
         // API REGRESSION TESTS - MAIN
-        // ----------------------------------------
 
         stage('API Regression Tests') {
             when {
@@ -234,12 +226,9 @@ pipeline {
             }
         }
 
-        // ----------------------------------------
         // POSTGRESQL DATABASE TESTS
-        // ----------------------------------------
 
         stage('Database Tests') {
-
             steps {
                 catchError(
                     buildResult: 'FAILURE',
@@ -268,12 +257,9 @@ pipeline {
             }
         }
 
-        // ----------------------------------------
         // API TO DATABASE INTEGRATION TESTS
-        // ----------------------------------------
 
         stage('API DB Integration Tests') {
-
             steps {
                 catchError(
                     buildResult: 'FAILURE',
@@ -361,12 +347,9 @@ pipeline {
             }
         }
 
-        // ----------------------------------------
         // MERGE PLAYWRIGHT BLOB REPORTS
-        // ----------------------------------------
 
         stage('Merge Playwright Reports') {
-
             steps {
                 sh '''
                     mkdir -p merged-blob-reports
@@ -393,23 +376,18 @@ pipeline {
         }
     }
 
-    // ----------------------------------------
     // POST BUILD ACTIONS
-    // ----------------------------------------
 
     post {
-
         always {
-
             script {
-
                 junit(
-                    testResults: 'test-results/*-junit.xml',
+                    testResults: '*-junit.xml',
                     allowEmptyResults: true
                 )
 
                 archiveArtifacts(
-                    artifacts: 'playwright-report/**,blob-reports/**/*.zip,merged-blob-reports/**,test-results/*-junit.xml,backend.log',
+                    artifacts: 'playwright-report/**,blob-reports/**/*.zip,merged-blob-reports/**,*-junit.xml,backend.log',
                     allowEmptyArchive: true
                 )
 

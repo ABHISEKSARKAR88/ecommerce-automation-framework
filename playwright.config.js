@@ -48,6 +48,7 @@ module.exports = defineConfig({
       testIgnore: [
         '**/auth.setup.js',
         '**/api/**',
+        '**/db/**',
         '**/flaky-demo.spec.js',
       ],
     },
@@ -61,6 +62,7 @@ module.exports = defineConfig({
       testIgnore: [
         '**/auth.setup.js',
         '**/api/**',
+        '**/db/**',
         '**/flaky-demo.spec.js',
       ],
     },
@@ -78,6 +80,7 @@ module.exports = defineConfig({
       testIgnore: [
         '**/auth.setup.js',
         '**/api/**',
+        '**/db/**',
         '**/flaky-demo.spec.js',
       ],
     },
