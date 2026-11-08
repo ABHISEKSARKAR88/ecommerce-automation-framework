@@ -1,5 +1,6 @@
 
 const { defineConfig } = require('@playwright/test');
+const { environment } = require('./config/environment');
 
 module.exports = defineConfig({
   testDir: './tests',
@@ -14,78 +15,98 @@ module.exports = defineConfig({
   workers: process.env.CI ? 2 : undefined,
 
   reporter: [
-  ['list'],
-  ['html', { open: 'never' }],
-  ['junit', {
-    outputFile: process.env.PLAYWRIGHT_JUNIT_OUTPUT_NAME
-      ? `test-results/${process.env.PLAYWRIGHT_JUNIT_OUTPUT_NAME}`
-      : 'test-results/results.xml',
-  }],
-],
+    ['list'],
+    ['html', { open: 'never' }],
+    [
+      'junit',
+      {
+        outputFile: process.env.PLAYWRIGHT_JUNIT_OUTPUT_NAME
+          ? `test-results/${process.env.PLAYWRIGHT_JUNIT_OUTPUT_NAME}`
+          : 'test-results/results.xml',
+      },
+    ],
+  ],
 
   use: {
-    baseURL: 'https://www.saucedemo.com',
+    baseURL: environment.uiBaseUrl,
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
   },
 
-
-projects: [
-  {
-    name: 'setup',
-    testMatch: '**/auth.setup.js',
-  },
-
-  {
-    name: 'chromium',
-    use: {
-      browserName: 'chromium',
+  projects: [
+    {
+      name: 'setup',
+      testMatch: '**/auth.setup.js',
     },
-    dependencies: ['setup'],
-    testIgnore: [
-      '**/auth.setup.js',
-      '**/api/**',
-      '**/flaky-demo.spec.js',
-    ],
-  },
 
-  {
-    name: 'firefox',
-    use: {
-      browserName: 'firefox',
+    {
+      name: 'chromium',
+      use: {
+        browserName: 'chromium',
+      },
+      dependencies: ['setup'],
+      testIgnore: [
+        '**/auth.setup.js',
+        '**/api/**',
+        '**/flaky-demo.spec.js',
+      ],
     },
-    dependencies: ['setup'],
-    testIgnore: [
-      '**/auth.setup.js',
-      '**/api/**',
-      '**/flaky-demo.spec.js',
-    ],
-  },
 
-  {
-    name: 'webkit',
-    use: {
-      browserName: 'webkit',
-      viewport: {
-        width: 1440,
-        height: 900,
+    {
+      name: 'firefox',
+      use: {
+        browserName: 'firefox',
+      },
+      dependencies: ['setup'],
+      testIgnore: [
+        '**/auth.setup.js',
+        '**/api/**',
+        '**/flaky-demo.spec.js',
+      ],
+    },
+
+    {
+      name: 'webkit',
+      use: {
+        browserName: 'webkit',
+        viewport: {
+          width: 1440,
+          height: 900,
+        },
+      },
+      dependencies: ['setup'],
+      testIgnore: [
+        '**/auth.setup.js',
+        '**/api/**',
+        '**/flaky-demo.spec.js',
+      ],
+    },
+
+    {
+      name: 'api',
+      testMatch: '**/*.api.spec.js',
+      testIgnore: '**/products-db-*.api.spec.js',
+      use: {
+        baseURL: environment.apiBaseUrl,
       },
     },
-    dependencies: ['setup'],
-    testIgnore: [
-      '**/auth.setup.js',
-      '**/api/**',
-      '**/flaky-demo.spec.js',
-    ],
-  },
 
-  {
-    name: 'api',
-    testMatch: '**/*.api.spec.js',
-    use: {
-      baseURL: 'https://dummyjson.com',
+    {
+      name: 'integration',
+      testMatch: '**/products-db-*.api.spec.js',
+      use: {
+        baseURL: environment.backendBaseUrl,
+      },
+      fullyParallel: true,
+      retries: 0,
     },
-  },
-],
 
+    {
+      name: 'db',
+      testMatch: '**/*.db.spec.js',
+      fullyParallel: false,
+      workers: 1,
+      retries: 0,
+    },
+  ],
 });

@@ -1,7 +1,8 @@
+
 {
   "name": "ecommerce-automation-framework",
   "version": "1.0.0",
-  "description": "",
+  "description": "Playwright JavaScript UI, API and Database Automation Framework",
   "main": "index.js",
   "scripts": {
     "test": "playwright test",
@@ -11,16 +12,38 @@
     "test:smoke": "playwright test --grep @smoke",
     "test:regression": "playwright test --grep @regression",
     "report": "playwright show-report",
+
     "test:api": "playwright test --project=api",
     "test:api:smoke": "playwright test --project=api --grep @smoke",
-    "test:api:regression": "playwright test --project=api --grep @regression"
+    "test:api:regression": "playwright test --project=api --grep @regression",
+
+    "test:db": "playwright test --project=db",
+    "test:integration": "playwright test --project=integration",
+
+    "test:ui:local": "TEST_ENV=local playwright test --project=chromium",
+    "test:api:local": "TEST_ENV=local playwright test --project=api",
+    "test:db:local": "TEST_ENV=local playwright test --project=db",
+    "test:integration:local": "TEST_ENV=local playwright test --project=integration",
+
+    "backend:start": "TEST_ENV=local node src/backend/server.js"
   },
-  "keywords": [],
+  "keywords": [
+    "playwright",
+    "javascript",
+    "automation",
+    "api-testing",
+    "database-testing"
+  ],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "devDependencies": {
     "@playwright/test": "^1.64.1",
     "ajv": "^8.20.0"
+  },
+  "dependencies": {
+    "dotenv": "^18.0.9",
+    "express": "^5.3.0",
+    "pg": "^8.23.1"
   }
 }

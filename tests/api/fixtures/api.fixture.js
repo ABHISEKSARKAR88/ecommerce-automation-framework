@@ -7,15 +7,14 @@ import {
 
 import { ProductClient } from '../clients/ProductClient.js';
 
-const API_BASE_URL = 'https://dummyjson.com';
+import { environment } from '../../../config/environment.js';
 
 export const test = base.extend({
 
-  // Authenticated API context
   authenticatedRequest: async ({ request }, use) => {
 
-    const username = process.env.API_USERNAME || 'emilys';
-    const password = process.env.API_PASSWORD || 'emilyspass';
+    const username = environment.apiCredentials.username;
+    const password = environment.apiCredentials.password;
 
     const loginResponse = await request.post('/auth/login', {
       data: {
@@ -33,7 +32,7 @@ export const test = base.extend({
     expect(accessToken).toBeTruthy();
 
     const apiContext = await apiRequest.newContext({
-      baseURL: API_BASE_URL,
+      baseURL: environment.apiBaseUrl,
       extraHTTPHeaders: {
         Authorization: `Bearer ${accessToken}`,
       },
@@ -44,7 +43,6 @@ export const test = base.extend({
     await apiContext.dispose();
   },
 
-  // Unauthenticated product client
   productClient: async ({ request }, use) => {
 
     const client = new ProductClient(request);
@@ -52,7 +50,6 @@ export const test = base.extend({
     await use(client);
   },
 
-  // Authenticated product client
   authenticatedProductClient: async ({
     authenticatedRequest,
   }, use) => {
