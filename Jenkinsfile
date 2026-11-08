@@ -9,10 +9,17 @@ pipeline {
 
     environment {
         CI = 'true'
+        TEST_ENV = 'local'
+
         PATH = "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:${env.PATH}"
+
+        DB_HOST = 'localhost'
+        DB_PORT = '5432'
+        DB_NAME = 'ecommerce_test'
     }
 
     stages {
+
         stage('Clean Reports') {
             steps {
                 sh '''
@@ -26,6 +33,11 @@ pipeline {
                     rm -f shard-2-junit.xml
                     rm -f api-smoke-junit.xml
                     rm -f api-regression-junit.xml
+                    rm -f db-junit.xml
+                    rm -f integration-junit.xml
+
+                    rm -f backend.log
+                    rm -f backend.pid
                 '''
             }
         }
@@ -48,6 +60,10 @@ pipeline {
             }
         }
 
+        // ----------------------------------------
+        // UI SMOKE TESTS - NON MAIN BRANCHES
+        // ----------------------------------------
+
         stage('Smoke Tests') {
             when {
                 not {
@@ -56,6 +72,7 @@ pipeline {
             }
 
             parallel {
+
                 stage('Smoke Shard 1') {
                     steps {
                         catchError(
@@ -102,12 +119,17 @@ pipeline {
             }
         }
 
+        // ----------------------------------------
+        // UI REGRESSION TESTS - MAIN
+        // ----------------------------------------
+
         stage('Regression Tests') {
             when {
                 branch 'main'
             }
 
             parallel {
+
                 stage('Regression Shard 1') {
                     steps {
                         catchError(
@@ -154,6 +176,10 @@ pipeline {
             }
         }
 
+        // ----------------------------------------
+        // API SMOKE TESTS - NON MAIN BRANCHES
+        // ----------------------------------------
+
         stage('API Smoke Tests') {
             when {
                 not {
@@ -180,6 +206,10 @@ pipeline {
             }
         }
 
+        // ----------------------------------------
+        // API REGRESSION TESTS - MAIN
+        // ----------------------------------------
+
         stage('API Regression Tests') {
             when {
                 branch 'main'
@@ -204,7 +234,139 @@ pipeline {
             }
         }
 
+        // ----------------------------------------
+        // POSTGRESQL DATABASE TESTS
+        // ----------------------------------------
+
+        stage('Database Tests') {
+
+            steps {
+                catchError(
+                    buildResult: 'FAILURE',
+                    stageResult: 'FAILURE'
+                ) {
+
+                    withCredentials([
+                        usernamePassword(
+                            credentialsId: 'ecommerce-postgres-credentials',
+                            usernameVariable: 'DB_USER',
+                            passwordVariable: 'DB_PASSWORD'
+                        )
+                    ]) {
+
+                        sh '''
+                            PLAYWRIGHT_BLOB_OUTPUT_DIR=blob-reports/db \
+                            PLAYWRIGHT_JUNIT_OUTPUT_NAME=db-junit.xml \
+                            npx playwright test \
+                                --project=db \
+                                --workers=1 \
+                                --output=test-results/db \
+                                --reporter=blob,junit
+                        '''
+                    }
+                }
+            }
+        }
+
+        // ----------------------------------------
+        // API TO DATABASE INTEGRATION TESTS
+        // ----------------------------------------
+
+        stage('API DB Integration Tests') {
+
+            steps {
+                catchError(
+                    buildResult: 'FAILURE',
+                    stageResult: 'FAILURE'
+                ) {
+
+                    withCredentials([
+                        usernamePassword(
+                            credentialsId: 'ecommerce-postgres-credentials',
+                            usernameVariable: 'DB_USER',
+                            passwordVariable: 'DB_PASSWORD'
+                        )
+                    ]) {
+
+                        sh '''
+                            set -e
+
+                            echo "Starting Express backend..."
+
+                            TEST_ENV=local node src/backend/server.js \
+                                > backend.log 2>&1 &
+
+                            BACKEND_PID=$!
+
+                            cleanup_backend() {
+                                echo "Stopping Express backend..."
+
+                                if kill -0 "$BACKEND_PID" 2>/dev/null; then
+                                    kill "$BACKEND_PID"
+                                    wait "$BACKEND_PID" || true
+                                fi
+
+                                rm -f backend.pid
+                            }
+
+                            trap cleanup_backend EXIT
+
+                            echo "$BACKEND_PID" > backend.pid
+
+                            echo "Waiting for backend readiness..."
+
+                            READY=false
+
+                            for attempt in $(seq 1 30); do
+
+                                HTTP_STATUS=$(curl \
+                                    -sS \
+                                    -o /dev/null \
+                                    -w "%{http_code}" \
+                                    http://localhost:3000/api/products/999999999 \
+                                    || true)
+
+                                if [ "$HTTP_STATUS" = "200" ] || \
+                                   [ "$HTTP_STATUS" = "404" ]; then
+
+                                    READY=true
+                                    break
+                                fi
+
+                                sleep 1
+                            done
+
+                            if [ "$READY" != "true" ]; then
+                                echo "Backend failed to start."
+
+                                cat backend.log
+
+                                exit 1
+                            fi
+
+                            echo "Backend is ready."
+
+                            PLAYWRIGHT_BLOB_OUTPUT_DIR=blob-reports/integration \
+                            PLAYWRIGHT_JUNIT_OUTPUT_NAME=integration-junit.xml \
+                            npx playwright test \
+                                --project=integration \
+                                --workers=2 \
+                                --output=test-results/integration \
+                                --reporter=blob,junit
+
+                            echo "Integration tests completed."
+                        '''
+                    }
+                }
+            }
+        }
+
+        // ----------------------------------------
+        // MERGE PLAYWRIGHT BLOB REPORTS
+        // ----------------------------------------
+
         stage('Merge Playwright Reports') {
+
             steps {
                 sh '''
                     mkdir -p merged-blob-reports
@@ -231,16 +393,23 @@ pipeline {
         }
     }
 
+    // ----------------------------------------
+    // POST BUILD ACTIONS
+    // ----------------------------------------
+
     post {
+
         always {
+
             script {
+
                 junit(
-                    testResults: '*-junit.xml',
+                    testResults: 'test-results/*-junit.xml',
                     allowEmptyResults: true
                 )
 
                 archiveArtifacts(
-                    artifacts: 'playwright-report/**,blob-reports/**/*.zip,merged-blob-reports/**,*-junit.xml',
+                    artifacts: 'playwright-report/**,blob-reports/**/*.zip,merged-blob-reports/**,test-results/*-junit.xml,backend.log',
                     allowEmptyArchive: true
                 )
 
